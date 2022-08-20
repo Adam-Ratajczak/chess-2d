@@ -10,6 +10,7 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
@@ -23,6 +24,8 @@ Board::Board(std::string const& new_theme) {
     theme = new_theme;
 
     m_board_texture.loadFromFile("../assets/chess" + Board::theme + "/board.png");
+    m_numbers_texture.loadFromFile("../assets/chess" + Board::theme + "/numbers.png");
+    m_letters_texture.loadFromFile("../assets/chess" + Board::theme + "/text.png");
 }
 
 void Board::init() {
@@ -53,7 +56,7 @@ void Board::init() {
 
     m_pieces.push_back(std::make_shared<King>(sf::Vector2i(4, 7), true));
     m_black_king = m_pieces.back().get();
-    
+
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(5, 7), true));
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(6, 7), true));
     m_pieces.push_back(std::make_shared<Rook>(sf::Vector2i(7, 7), true));
@@ -73,6 +76,18 @@ void Board::draw(sf::RenderWindow& window) const {
     board.setPosition((float)window.getSize().x / 2, (float)window.getSize().y / 2);
     board.setScale(scale, scale);
     window.draw(board);
+
+    sf::Sprite numbers;
+    numbers.setTexture(m_numbers_texture);
+    numbers.setScale((float)size / m_numbers_texture.getSize().y, (float)size / m_numbers_texture.getSize().y);
+    numbers.setPosition(board.getGlobalBounds().left - 20 - numbers.getGlobalBounds().width, board.getGlobalBounds().top);
+    window.draw(numbers);
+
+    sf::Sprite letters;
+    letters.setTexture(m_letters_texture);
+    letters.setScale((float)size / m_letters_texture.getSize().x, (float)size / m_letters_texture.getSize().x);
+    letters.setPosition(board.getGlobalBounds().left, board.getGlobalBounds().top - 20 - letters.getGlobalBounds().height);
+    window.draw(letters);
 
     for (const auto& move : m_moves) {
         sf::Vector2f center(board.getGlobalBounds().left + (move.pos.x + .5) * board.getGlobalBounds().width / 8, board.getGlobalBounds().top + (move.pos.y + .5) * board.getGlobalBounds().height / 8);
@@ -149,8 +164,8 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
                 if (move.move_type == Move::MoveType::ATTACK) {
                 }
                 else {
-                    if(m_selected == m_white_king || m_selected == m_black_king){
-                        if(move.move_type == Move::MoveType::SPECIAL){
+                    if (m_selected == m_white_king || m_selected == m_black_king) {
+                        if (move.move_type == Move::MoveType::SPECIAL) {
                             auto rook = query_piece(sf::Vector2i(move.pos.x == 2 ? 0 : 7, move.pos.y));
                             rook->move(sf::Vector2i(move.pos.x == 2 ? 3 : 5, move.pos.y));
                         }
@@ -166,7 +181,7 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
         }
 
         for (const auto& piece : m_pieces) {
-            if(piece->side() != m_turn)
+            if (piece->side() != m_turn)
                 continue;
 
             auto rect = create_rect(piece->pos());

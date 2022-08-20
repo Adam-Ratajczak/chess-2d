@@ -29,7 +29,7 @@ private:
     Piece* m_black_king = nullptr;
     Piece* m_white_king = nullptr;
 
-    sf::Texture m_board_texture;
+    sf::Texture m_board_texture, m_numbers_texture, m_letters_texture;
 
     bool m_turn = true;
 };
