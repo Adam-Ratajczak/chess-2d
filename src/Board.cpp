@@ -49,8 +49,6 @@ void Board::init() {
     m_pieces.push_back(std::make_shared<Rook>(sf::Vector2i(7, 7), true));
     m_moves = m_pieces[9]->get_moves(this);
 
-    std::cout << m_moves.size() << "\n";
-
     for (auto& piece : m_pieces) {
         piece->load_texture();
     }
