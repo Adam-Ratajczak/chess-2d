@@ -8,6 +8,7 @@
 #include "pieces/Rook.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <iostream>
@@ -47,7 +48,6 @@ void Board::init() {
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(5, 7), true));
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(6, 7), true));
     m_pieces.push_back(std::make_shared<Rook>(sf::Vector2i(7, 7), true));
-    m_moves = m_pieces[9]->get_moves(this);
 
     for (auto& piece : m_pieces) {
         piece->load_texture();
@@ -75,16 +75,21 @@ void Board::draw(sf::RenderWindow& window) const {
             circ.setFillColor(sf::Color(120, 120, 120, 180));
             window.draw(circ);
         } break;
-        case Move::MoveType::ATTACK:
-
-            break;
-        case Move::MoveType::SPECIAL:
+        case Move::MoveType::ATTACK: {
+            sf::RectangleShape rect;
+            rect.setSize(sf::Vector2f(board.getGlobalBounds().width / 8, board.getGlobalBounds().width / 8));
+            rect.setOrigin(rect.getSize().x / 2, rect.getSize().y / 2);
+            rect.setPosition(center);
+            rect.setFillColor(sf::Color(255, 0, 0, 180));
+            window.draw(rect);
+        } break;
+        case Move::MoveType::SPECIAL: {
             sf::CircleShape circ(board.getGlobalBounds().width / 32);
             circ.setOrigin(circ.getRadius(), circ.getRadius());
             circ.setPosition(center);
             circ.setFillColor(sf::Color(120, 120, 255, 180));
             window.draw(circ);
-            break;
+        } break;
         }
     }
 
