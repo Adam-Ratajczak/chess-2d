@@ -19,11 +19,17 @@ public:
     Piece* query_piece(sf::Vector2i const& slot) const;
 
     void draw(sf::RenderWindow& window) const;
-    void handle_events(sf::Event& event);
+    void handle_events(sf::RenderWindow& window, sf::Event& event);
 
 private:
     std::vector<std::shared_ptr<Piece>> m_pieces;
     std::vector<Move> m_moves;
 
+    Piece* m_selected = nullptr;
+    Piece* m_black_king = nullptr;
+    Piece* m_white_king = nullptr;
+
     sf::Texture m_board_texture;
+
+    bool m_turn = true;
 };

@@ -8,9 +8,12 @@
 #include "pieces/Rook.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <iostream>
 #include <memory>
 
@@ -27,7 +30,10 @@ void Board::init() {
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(1, 0), false));
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(2, 0), false));
     m_pieces.push_back(std::make_shared<Queen>(sf::Vector2i(3, 0), false));
+
     m_pieces.push_back(std::make_shared<King>(sf::Vector2i(4, 0), false));
+    m_black_king = m_pieces.back().get();
+
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(5, 0), false));
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(6, 0), false));
     m_pieces.push_back(std::make_shared<Rook>(sf::Vector2i(7, 0), false));
@@ -44,7 +50,10 @@ void Board::init() {
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(1, 7), true));
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(2, 7), true));
     m_pieces.push_back(std::make_shared<Queen>(sf::Vector2i(3, 7), true));
+
     m_pieces.push_back(std::make_shared<King>(sf::Vector2i(4, 7), true));
+    m_black_king = m_pieces.back().get();
+    
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(5, 7), true));
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(6, 7), true));
     m_pieces.push_back(std::make_shared<Rook>(sf::Vector2i(7, 7), true));
@@ -106,4 +115,71 @@ Piece* Board::query_piece(const sf::Vector2i& slot) const {
     }
 
     return nullptr;
+}
+
+void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
+    if (event.type == sf::Event::MouseButtonPressed) {
+        sf::Sprite board;
+        board.setTexture(m_board_texture);
+
+        int size = std::min(window.getSize().x, window.getSize().y) - 200;
+        float scale = (float)size / m_board_texture.getSize().x;
+        board.setOrigin((float)m_board_texture.getSize().x / 2, (float)m_board_texture.getSize().y / 2);
+        board.setPosition((float)window.getSize().x / 2, (float)window.getSize().y / 2);
+        board.setScale(scale, scale);
+
+        auto create_rect = [&](sf::Vector2i pos) -> sf::IntRect {
+            sf::IntRect result;
+            float tile_size = board.getGlobalBounds().width / 8;
+
+            result.left = board.getGlobalBounds().left + pos.x * tile_size;
+            result.top = board.getGlobalBounds().top + (pos.y + .5) * tile_size;
+            result.width = tile_size;
+            result.height = tile_size;
+
+            return result;
+        };
+
+        sf::Vector2i mouse_pos = sf::Mouse::getPosition();
+
+        for (const auto& move : m_moves) {
+            auto rect = create_rect(move.pos);
+
+            if (rect.contains(mouse_pos)) {
+                if (move.move_type == Move::MoveType::ATTACK) {
+                }
+                else {
+                    if(m_selected == m_white_king || m_selected == m_black_king){
+                        if(move.move_type == Move::MoveType::SPECIAL){
+                            auto rook = query_piece(sf::Vector2i(move.pos.x == 2 ? 0 : 7, move.pos.y));
+                            rook->move(sf::Vector2i(move.pos.x == 2 ? 3 : 5, move.pos.y));
+                        }
+                    }
+                    m_selected->move(move.pos);
+                }
+
+                m_turn = !m_turn;
+                m_moves.clear();
+                m_selected = nullptr;
+                return;
+            }
+        }
+
+        for (const auto& piece : m_pieces) {
+            if(piece->side() != m_turn)
+                continue;
+
+            auto rect = create_rect(piece->pos());
+
+            if (rect.contains(mouse_pos)) {
+                m_selected = piece.get();
+                m_moves = m_selected->get_moves(this);
+
+                return;
+            }
+        }
+
+        m_moves.clear();
+        m_selected = nullptr;
+    }
 }

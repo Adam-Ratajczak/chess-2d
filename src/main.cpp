@@ -17,6 +17,8 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
+        board.handle_events(window, event);
+
         window.clear(sf::Color::Green);
 
         board.draw(window);
