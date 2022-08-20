@@ -9,6 +9,15 @@ find_package(SFML 2.5.1 COMPONENTS graphics audio REQUIRED)
 add_executable(
     chess
     src/main.cpp
+    src/Board.cpp
+
+    src/pieces/Piece.cpp
+    src/pieces/Bishop.cpp
+    src/pieces/King.cpp
+    src/pieces/Knight.cpp
+    src/pieces/Pawn.cpp
+    src/pieces/Queen.cpp
+    src/pieces/Rook.cpp
 )
 target_link_libraries(
     chess
