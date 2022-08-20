@@ -5,37 +5,43 @@
 #include <algorithm>
 #include <iostream>
 
-const std::vector<Move> Pawn::get_moves(bool) const {
+const std::vector<Move> Pawn::get_moves(const Board* pieces) const {
     std::vector<Move> result;
 
-    if (side()) {
-        result.push_back(Move { .pos = sf::Vector2i(pos().x - 1, pos().y - 1),
-            .move_type = Move::MoveType::ATTACK });
-        result.push_back(Move { .pos = sf::Vector2i(pos().x, pos().y - 1),
-            .move_type = Move::MoveType::MOVE });
-        result.push_back(Move { .pos = sf::Vector2i(pos().x + 1, pos().y - 1),
-            .move_type = Move::MoveType::ATTACK });
+    auto fits_on_board = [](sf::Vector2i const& to_test) -> bool {
+        return to_test.x >= 0 && to_test.x <= 7 && to_test.y >= 0 && to_test.y <= 7;
+    };
 
-        if (first_move())
-            result.push_back(Move { .pos = sf::Vector2i(pos().x, pos().y - 2),
-                .move_type = Move::MoveType::SPECIAL });
+    auto search_slot = [&](int fx, int fy, Move::MoveType type) {
+        sf::Vector2i it(pos().x + fx, pos().y + fy);
+
+        if (fits_on_board(it)) {
+            auto piece = pieces->query_piece(it);
+            if (type == Move::MoveType::ATTACK) {
+                if (piece && piece->side() != side()) {
+                    result.push_back(Move { .pos = it, .move_type = type });
+                }
+            }
+            else {
+                result.push_back(Move { .pos = it, .move_type = type });
+            }
+        }
+    };
+
+    if(side()){
+        search_slot(-1, -1, Move::MoveType::ATTACK);
+        search_slot(0, -1, Move::MoveType::MOVE);
+        search_slot(1, -1, Move::MoveType::ATTACK);
+
+        if(first_move())
+            search_slot(0, -2, Move::MoveType::SPECIAL);
+    }else{
+        search_slot(-1, 1, Move::MoveType::ATTACK);
+        search_slot(0, 1, Move::MoveType::MOVE);
+        search_slot(1, 1, Move::MoveType::ATTACK);
+        if(first_move())
+            search_slot(0, 2, Move::MoveType::SPECIAL);
     }
-    else {
-        result.push_back(Move { .pos = sf::Vector2i(pos().x - 1, pos().y + 1),
-            .move_type = Move::MoveType::ATTACK });
-        result.push_back(Move { .pos = sf::Vector2i(pos().x, pos().y + 1),
-            .move_type = Move::MoveType::MOVE });
-        result.push_back(Move { .pos = sf::Vector2i(pos().x + 1, pos().y + 1),
-            .move_type = Move::MoveType::ATTACK });
-
-        if (first_move())
-            result.push_back(Move { .pos = sf::Vector2i(pos().x, pos().y + 2),
-                .move_type = Move::MoveType::SPECIAL });
-    }
-
-    auto val = std::remove_if(result.begin(), result.end(), [](const Move& lhs) -> bool {
-        return lhs.pos.x < 0 || lhs.pos.y < 0;
-    });
 
     return result;
 }

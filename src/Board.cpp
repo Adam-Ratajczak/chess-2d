@@ -3,10 +3,14 @@
 #include "pieces/King.hpp"
 #include "pieces/Knight.hpp"
 #include "pieces/Pawn.hpp"
+#include "pieces/Piece.hpp"
 #include "pieces/Queen.hpp"
 #include "pieces/Rook.hpp"
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <iostream>
 #include <memory>
 
 std::string Board::theme = "";
@@ -43,6 +47,9 @@ void Board::init() {
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(5, 7), true));
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(6, 7), true));
     m_pieces.push_back(std::make_shared<Rook>(sf::Vector2i(7, 7), true));
+    m_moves = m_pieces[9]->get_moves(this);
+
+    std::cout << m_moves.size() << "\n";
 
     for (auto& piece : m_pieces) {
         piece->load_texture();
@@ -55,15 +62,45 @@ void Board::draw(sf::RenderWindow& window) const {
 
     int size = std::min(window.getSize().x, window.getSize().y) - 200;
     float scale = (float)size / m_board_texture.getSize().x;
-    board.setPosition((float)window.getSize().x / 2,
-        (float)window.getSize().y / 2);
-    board
-        .setOrigin((float)m_board_texture.getSize().x / 2,
-            (float)m_board_texture.getSize().y / 2);
+    board.setOrigin((float)m_board_texture.getSize().x / 2, (float)m_board_texture.getSize().y / 2);
+    board.setPosition((float)window.getSize().x / 2, (float)window.getSize().y / 2);
     board.setScale(scale, scale);
     window.draw(board);
 
-    for (const auto& piece : m_pieces) {
-        piece->draw(window, board.getPosition(), size, scale);
+    for (const auto& move : m_moves) {
+        sf::Vector2f center(board.getGlobalBounds().left + (move.pos.x + .5) * board.getGlobalBounds().width / 8, board.getGlobalBounds().top + (move.pos.y + .5) * board.getGlobalBounds().height / 8);
+        switch (move.move_type) {
+        case Move::MoveType::MOVE: {
+            sf::CircleShape circ(board.getGlobalBounds().width / 32);
+            circ.setOrigin(circ.getRadius(), circ.getRadius());
+            circ.setPosition(center);
+            circ.setFillColor(sf::Color(120, 120, 120, 180));
+            window.draw(circ);
+        } break;
+        case Move::MoveType::ATTACK:
+
+            break;
+        case Move::MoveType::SPECIAL:
+            sf::CircleShape circ(board.getGlobalBounds().width / 32);
+            circ.setOrigin(circ.getRadius(), circ.getRadius());
+            circ.setPosition(center);
+            circ.setFillColor(sf::Color(120, 120, 255, 180));
+            window.draw(circ);
+            break;
+        }
     }
+
+    for (const auto& piece : m_pieces) {
+        piece->draw(window, board.getGlobalBounds());
+    }
+}
+
+Piece* Board::query_piece(const sf::Vector2i& slot) const {
+    for (const auto& piece : m_pieces) {
+        if (piece->pos() == slot) {
+            return piece.get();
+        }
+    }
+
+    return nullptr;
 }
