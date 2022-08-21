@@ -8,7 +8,9 @@
 int main() {
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Chess 2d");
 
-    Board board("");
+    // Board board("");
+    // Board board("_green");
+    Board board("_pink");
     board.init();
 
     while (window.isOpen()) {
@@ -18,8 +20,6 @@ int main() {
                 window.close();
         }
         board.handle_events(window, event);
-
-        window.clear(sf::Color::Green);
 
         board.draw(window);
 

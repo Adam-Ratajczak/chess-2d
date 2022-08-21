@@ -26,6 +26,8 @@ Board::Board(std::string const& new_theme) {
     m_board_texture.loadFromFile("../assets/chess" + Board::theme + "/board.png");
     m_numbers_texture.loadFromFile("../assets/chess" + Board::theme + "/numbers.png");
     m_letters_texture.loadFromFile("../assets/chess" + Board::theme + "/text.png");
+
+    m_bg_color = m_board_texture.copyToImage().getPixel(0, 0);
 }
 
 void Board::init() {
@@ -67,6 +69,8 @@ void Board::init() {
 }
 
 void Board::draw(sf::RenderWindow& window) const {
+    window.clear(m_bg_color);
+
     sf::Sprite board;
     board.setTexture(m_board_texture);
 
@@ -77,16 +81,20 @@ void Board::draw(sf::RenderWindow& window) const {
     board.setScale(scale, scale);
     window.draw(board);
 
+    sf::Color inverted(-m_bg_color.r, -m_bg_color.g, -m_bg_color.b);
+
     sf::Sprite numbers;
     numbers.setTexture(m_numbers_texture);
     numbers.setScale((float)size / m_numbers_texture.getSize().y, (float)size / m_numbers_texture.getSize().y);
     numbers.setPosition(board.getGlobalBounds().left - 20 - numbers.getGlobalBounds().width, board.getGlobalBounds().top);
+    numbers.setColor(inverted);
     window.draw(numbers);
 
     sf::Sprite letters;
     letters.setTexture(m_letters_texture);
     letters.setScale((float)size / m_letters_texture.getSize().x, (float)size / m_letters_texture.getSize().x);
     letters.setPosition(board.getGlobalBounds().left, board.getGlobalBounds().top - 20 - letters.getGlobalBounds().height);
+    letters.setColor(inverted);
     window.draw(letters);
 
     for (const auto& move : m_moves) {
