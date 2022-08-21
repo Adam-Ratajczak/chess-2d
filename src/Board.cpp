@@ -170,6 +170,18 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
 
             if (rect.contains(mouse_pos)) {
                 if (move.move_type == Move::MoveType::ATTACK) {
+                    auto deleted_piece = query_piece(move.pos);
+                    deleted_piece->delete_piece();
+                    
+                    if(deleted_piece->side()){
+                        deleted_piece->move(sf::Vector2i(9 + m_deleted_white_pieces / 8, m_deleted_white_pieces % 8));
+                        m_deleted_white_pieces++;
+                    }else{
+                        deleted_piece->move(sf::Vector2i(-2 - m_deleted_black_pieces / 8, m_deleted_black_pieces % 8));
+                        m_deleted_black_pieces++;
+                    }
+
+                    m_selected->move(move.pos);
                 }
                 else {
                     if (m_selected == m_white_king || m_selected == m_black_king) {
@@ -189,7 +201,7 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
         }
 
         for (const auto& piece : m_pieces) {
-            if (piece->side() != m_turn)
+            if (piece->deleted() || piece->side() != m_turn)
                 continue;
 
             auto rect = create_rect(piece->pos());

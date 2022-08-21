@@ -35,4 +35,6 @@ private:
     sf::Color m_bg_color;
 
     bool m_turn = true;
+
+    size_t m_deleted_black_pieces = 0, m_deleted_white_pieces = 0;
 };

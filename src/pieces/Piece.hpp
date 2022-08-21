@@ -37,6 +37,9 @@ public:
     bool side() const { return m_side; }
     bool first_move() const { return m_first_move; }
 
+    void delete_piece() { m_deleted = true; }
+    bool deleted() const { return m_deleted; }
+
     virtual ~Piece() { }
 
 protected:
@@ -46,6 +49,6 @@ protected:
 private:
     sf::Vector2i m_pos;
     sf::Texture m_texture;
-    bool m_first_move = true;
+    bool m_first_move = true, m_deleted = false;
     const bool m_side;
 };
