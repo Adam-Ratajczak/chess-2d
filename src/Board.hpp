@@ -22,9 +22,12 @@ public:
     void draw(sf::RenderWindow& window) const;
     void handle_events(sf::RenderWindow& window, sf::Event& event);
 
+    void is_check();
+
 private:
     std::vector<std::shared_ptr<Piece>> m_pieces;
     std::vector<Move> m_moves;
+    std::vector<std::vector<Move>> m_allowed_moves;
 
     Piece* m_selected = nullptr;
     Piece* m_black_king = nullptr;
@@ -34,7 +37,7 @@ private:
 
     sf::Color m_bg_color;
 
-    bool m_turn = true;
+    bool m_turn = true, m_check = false;;
 
     size_t m_deleted_black_pieces = 0, m_deleted_white_pieces = 0;
 };

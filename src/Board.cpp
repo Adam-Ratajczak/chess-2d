@@ -57,7 +57,7 @@ void Board::init() {
     m_pieces.push_back(std::make_shared<Queen>(sf::Vector2i(3, 7), true));
 
     m_pieces.push_back(std::make_shared<King>(sf::Vector2i(4, 7), true));
-    m_black_king = m_pieces.back().get();
+    m_white_king = m_pieces.back().get();
 
     m_pieces.push_back(std::make_shared<Bishop>(sf::Vector2i(5, 7), true));
     m_pieces.push_back(std::make_shared<Knight>(sf::Vector2i(6, 7), true));
@@ -172,11 +172,12 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
                 if (move.move_type == Move::MoveType::ATTACK) {
                     auto deleted_piece = query_piece(move.pos);
                     deleted_piece->delete_piece();
-                    
-                    if(deleted_piece->side()){
+
+                    if (deleted_piece->side()) {
                         deleted_piece->move(sf::Vector2i(9 + m_deleted_white_pieces / 8, m_deleted_white_pieces % 8));
                         m_deleted_white_pieces++;
-                    }else{
+                    }
+                    else {
                         deleted_piece->move(sf::Vector2i(-2 - m_deleted_black_pieces / 8, m_deleted_black_pieces % 8));
                         m_deleted_black_pieces++;
                     }
@@ -217,4 +218,25 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
         m_moves.clear();
         m_selected = nullptr;
     }
+}
+
+void Board::is_check() {
+    for (const auto& piece : m_pieces) {
+        if (piece->side() != m_turn)
+            continue;
+        auto moves = piece->get_moves(this);
+
+        for (const auto& move : moves) {
+            if (move.move_type == Move::MoveType::ATTACK) {
+                auto possible_king = query_piece(move.pos);
+
+                if (possible_king == m_white_king || possible_king == m_black_king) {
+                    m_check = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    m_check = false;
 }

@@ -23,7 +23,9 @@ const std::vector<Move> Pawn::get_moves(const Board* pieces) const {
                 }
             }
             else {
-                result.push_back(Move { .pos = it, .move_type = type });
+                if(!piece){
+                    result.push_back(Move { .pos = it, .move_type = type });
+                }
             }
         }
     };
