@@ -14,6 +14,7 @@ struct Move {
     enum class MoveType {
         MOVE,
         ATTACK,
+        PROTECT,
         SPECIAL
     };
 

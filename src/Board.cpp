@@ -122,6 +122,7 @@ void Board::draw(sf::RenderWindow& window) const {
             circ.setFillColor(sf::Color(120, 120, 255, 180));
             window.draw(circ);
         } break;
+        default: break;
         }
     }
 
@@ -183,8 +184,9 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
                     }
 
                     m_selected->move(move.pos);
+                    m_turn = !m_turn;
                 }
-                else {
+                else if (move.move_type == Move::MoveType::MOVE || move.move_type == Move::MoveType::SPECIAL){
                     if (m_selected == m_white_king || m_selected == m_black_king) {
                         if (move.move_type == Move::MoveType::SPECIAL) {
                             auto rook = query_piece(sf::Vector2i(move.pos.x == 2 ? 0 : 7, move.pos.y));
@@ -192,9 +194,9 @@ void Board::handle_events(sf::RenderWindow& window, sf::Event& event) {
                         }
                     }
                     m_selected->move(move.pos);
+                    m_turn = !m_turn;
                 }
 
-                m_turn = !m_turn;
                 m_moves.clear();
                 m_selected = nullptr;
                 return;

@@ -12,17 +12,44 @@ const std::vector<Move> King::get_moves(const Board* pieces) const {
         return to_test.x >= 0 && to_test.x <= 7 && to_test.y >= 0 && to_test.y <= 7;
     };
 
+    std::vector<sf::Vector2i> forbidden_slots;
+
+    if(side() == pieces->turn()){
+        for (const auto& piece : pieces->pieces()) {
+            if (piece->side() == side())
+                continue;
+            auto moves = piece->get_moves(pieces);
+    
+            for (const auto& move : moves) {
+                forbidden_slots.push_back(move.pos);
+            }
+        }
+    }
+
+    auto test_forbidden = [&](sf::Vector2i const& to_test) -> bool {
+        for(const auto& slot : forbidden_slots){
+            if(slot == to_test)
+                return true;
+        }
+
+        return false;
+    };
+
     auto search_slot = [&](int fx, int fy) {
         sf::Vector2i it(pos().x + fx, pos().y + fy);
 
         if (fits_on_board(it)) {
             auto piece = pieces->query_piece(it);
             if (piece) {
-                if (piece->side() != side())
-                    result.push_back(Move { .pos = it, .move_type = Move::MoveType::ATTACK });
+                if (piece->side() != side()){
+                    if(!test_forbidden(it))
+                        result.push_back(Move { .pos = it, .move_type = Move::MoveType::ATTACK });
+                }else
+                    result.push_back(Move { .pos = it, .move_type = Move::MoveType::PROTECT });
             }
             else {
-                result.push_back(Move { .pos = it, .move_type = Move::MoveType::MOVE });
+                if(!test_forbidden(it))
+                    result.push_back(Move { .pos = it, .move_type = Move::MoveType::MOVE });
             }
         }
     };
@@ -35,33 +62,34 @@ const std::vector<Move> King::get_moves(const Board* pieces) const {
     search_slot(-1, 1);
     search_slot(0, 1);
     search_slot(1, 1);
-    
-    auto check_if_castle = [&](int y){
-        if(!first_move())
+
+    auto check_if_castle = [&](int y) {
+        if (!first_move())
             return;
 
         std::vector<Piece*> piece_row;
 
-        for(size_t i = 0; i < 8; i++){
+        for (size_t i = 0; i < 8; i++) {
             piece_row.push_back(pieces->query_piece(sf::Vector2i(i, y)));
         }
 
-        if(piece_row[0] && piece_row[0]->first_move()){
-            if(!piece_row[1] && !piece_row[2] && !piece_row[3]){
-                result.push_back(Move{.pos = sf::Vector2i(2, y), .move_type = Move::MoveType::SPECIAL});
+        if (piece_row[0] && piece_row[0]->first_move()) {
+            if (!piece_row[1] && !piece_row[2] && !piece_row[3]) {
+                result.push_back(Move { .pos = sf::Vector2i(2, y), .move_type = Move::MoveType::SPECIAL });
             }
         }
 
-        if(piece_row[7] && piece_row[7]->first_move()){
-            if(!piece_row[6] && !piece_row[5]){
-                result.push_back(Move{.pos = sf::Vector2i(6, y), .move_type = Move::MoveType::SPECIAL});
+        if (piece_row[7] && piece_row[7]->first_move()) {
+            if (!piece_row[6] && !piece_row[5]) {
+                result.push_back(Move { .pos = sf::Vector2i(6, y), .move_type = Move::MoveType::SPECIAL });
             }
         }
     };
 
-    if(side()){
+    if (side()) {
         check_if_castle(7);
-    }else{
+    }
+    else {
         check_if_castle(0);
     }
 

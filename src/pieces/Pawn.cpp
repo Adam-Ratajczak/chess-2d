@@ -18,9 +18,10 @@ const std::vector<Move> Pawn::get_moves(const Board* pieces) const {
         if (fits_on_board(it)) {
             auto piece = pieces->query_piece(it);
             if (type == Move::MoveType::ATTACK) {
-                if (piece && piece->side() != side()) {
+                if (piece && piece->side() != side())
                     result.push_back(Move { .pos = it, .move_type = type });
-                }
+                else
+                    result.push_back(Move { .pos = it, .move_type = Move::MoveType::PROTECT });
             }
             else {
                 if(!piece){

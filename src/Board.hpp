@@ -18,11 +18,14 @@ public:
     void init();
 
     Piece* query_piece(sf::Vector2i const& slot) const;
+    std::vector<std::shared_ptr<Piece>> const& pieces() const { return m_pieces; }
 
     void draw(sf::RenderWindow& window) const;
     void handle_events(sf::RenderWindow& window, sf::Event& event);
 
     void is_check();
+
+    bool turn() const { return m_turn; }
 
 private:
     std::vector<std::shared_ptr<Piece>> m_pieces;
@@ -37,7 +40,7 @@ private:
 
     sf::Color m_bg_color;
 
-    bool m_turn = true, m_check = false;;
+    bool m_turn = true, m_check = false;
 
     size_t m_deleted_black_pieces = 0, m_deleted_white_pieces = 0;
 };

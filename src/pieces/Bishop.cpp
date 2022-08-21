@@ -19,6 +19,8 @@ const std::vector<Move> Bishop::get_moves(const Board* pieces) const {
             if(piece){
                 if (piece->side() != side()) 
                     result.push_back(Move{.pos = it, .move_type = Move::MoveType::ATTACK});
+                else
+                    result.push_back(Move { .pos = it, .move_type = Move::MoveType::PROTECT });
                 return;
             }else{
                 result.push_back(Move{.pos = it, .move_type = Move::MoveType::MOVE});
